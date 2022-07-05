@@ -6,7 +6,8 @@ const tpl = require('@tryghost/tpl');
 
 const messages = {
     userNotFound: 'User not found',
-    apiKeyNotFound: 'API Key not found'
+    apiKeyNotFound: 'API Key not found',
+    memberNotFound: 'Member not found'
 };
 
 module.exports = {
@@ -52,7 +53,6 @@ module.exports = {
                 // @TODO fix this!
                 // Permissions is an array of models
                 // Roles is a JSON array
-                console.log('user', {permissions: allPerms, roles: user.roles});
                 return {permissions: allPerms, roles: user.roles};
             });
     },
@@ -80,11 +80,38 @@ module.exports = {
             .then((foundMember) => {
                 if (!foundMember) {
                     throw new errors.NotFoundError({
-                        message: tpl(messages.apiKeyNotFound)
+                        message: tpl(messages.memberNotFound)
                     });
                 }
 
-                return {};
+                const permissions = [
+                    new models.Permission({
+                        name: 'Browse comments',
+                        action_type: 'browse',
+                        object_type: 'comment'
+                    }),
+                    new models.Permission({
+                        name: 'Read comments',
+                        action_type: 'read',
+                        object_type: 'comment'
+                    }),
+                    new models.Permission({
+
+                        name: 'Edit comments',
+                        action_type: 'edit',
+                        object_type: 'comment'
+                    }),
+                    new models.Permission({
+                        name: 'Add comments',
+                        action_type: 'add',
+                        object_type: 'comment'
+                    }),
+                    new models.Permission({
+                        name: 'Delete comments',
+                        action_type: 'destroy',
+                        object_type: 'comment'
+                    })];
+                return {permissions};
             });
     }
 };

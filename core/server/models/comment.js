@@ -1,4 +1,10 @@
 const ghostBookshelf = require('./base');
+const errors = require('@tryghost/errors');
+const tpl = require('@tryghost/tpl');
+
+const messages = {
+    notYourComment: 'You may only edit your own comments'
+};
 
 const Comment = ghostBookshelf.Model.extend({
     tableName: 'comments',
@@ -32,9 +38,14 @@ const Comment = ghostBookshelf.Model.extend({
         model.emitChange('added', options);
     }
 }, {
-    async permissible(model, action, context, unsafeAttrs, loadedPermissions, hasUserPermission, hasApiKeyPermission, hasMemberPermission) {
-        console.log('checking permissions', hasMemberPermission);
-        return true;
+    async permissible(id, action, context, unsafeAttrs, loadedPermissions, hasUserPermission, hasApiKeyPermission, hasMemberPermission) {
+        if (action === 'edit' || action === 'destroy' && id !== context.member.id) {
+            return Promise.reject(new errors.NoPermissionError({
+                message: tpl(messages.notYourComment)
+            }));
+        }
+
+        return hasMemberPermission;
     }
 });
 
