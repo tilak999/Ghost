@@ -71,13 +71,12 @@ module.exports = {
                 const permissions = foundApiKey.related('role').related('permissions').models;
                 const roles = [foundApiKey.toJSON().role];
 
-                console.log('apiKey', {permissions, roles});
                 return {permissions, roles};
             });
     },
 
     member(id) {
-        return models.Members.findOne({id})
+        return models.Member.findOne({id})
             .then((foundMember) => {
                 if (!foundMember) {
                     throw new errors.NotFoundError({
@@ -85,7 +84,6 @@ module.exports = {
                     });
                 }
 
-                console.log('members', foundMember);
                 return {};
             });
     }
