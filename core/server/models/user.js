@@ -65,6 +65,19 @@ User = ghostBookshelf.Model.extend({
         };
     },
 
+    relationships: ['user_settings'],
+
+    relationshipBelongsTo: {
+        user_settings: 'user_settings'
+    },
+
+    relationsMeta: {
+        user_settings: {
+            targetTableName: 'user_settings',
+            foreignKey: 'user_id'
+        }
+    },
+
     format(options) {
         if (!_.isEmpty(options.website) &&
             !validator.isURL(options.website, {
@@ -95,6 +108,18 @@ User = ghostBookshelf.Model.extend({
         });
 
         return attrs;
+    },
+
+    defaultRelations: function defaultRelations(methodName, options) {
+        const USER_SETTINGS = _.without(ghostBookshelf.model('UserSettings').prototype.permittedAttributes(), 'id', 'user_id');
+
+        // NOTE: only include user_settings relation when requested in 'columns' or by default
+        //       optimization is needed to be able to perform .findAll on large SQLite datasets
+        if (!options.columns || (options.columns && _.intersection(USER_SETTINGS, options.columns).length)) {
+            options.withRelated = _.union(['user_settings'], options.withRelated || []);
+        }
+
+        return options;
     },
 
     emitChange: function emitChange(event, options) {
@@ -170,10 +195,26 @@ User = ghostBookshelf.Model.extend({
      * Lookup Gravatar if email changes to update image url
      * Generating a slug requires a db call to look for conflicting slugs
      */
-    onSaving: function onSaving(newPage, attr, options) {
+    onSaving: function onSaving(model, attr, options) {
         const self = this;
         const tasks = [];
         let passwordValidation = {};
+
+        /**
+         * CASE: Attach id to update existing user_settings entry for a post
+         * CASE: Don't create new user_settings entry if post meta is empty
+         */
+        if (!_.isUndefined(this.get('user_settings')) && !_.isNull(this.get('user_settings'))) {
+            let userSettingsData = this.get('user_settings');
+            let relatedModelId = model.related('user_settings').get('id');
+            let hasNoData = !_.values(userSettingsData).some(x => !!x);
+            if (relatedModelId && !_.isEmpty(userSettingsData)) {
+                userSettingsData.id = relatedModelId;
+                this.set('user_settings', userSettingsData);
+            } else if (_.isEmpty(userSettingsData) || hasNoData) {
+                this.set('user_settings', null);
+            }
+        }
 
         ghostBookshelf.Model.prototype.onSaving.apply(this, arguments);
 
@@ -283,6 +324,8 @@ User = ghostBookshelf.Model.extend({
         // remove password hash for security reasons
         delete attrs.password;
 
+        console.log(attrs);
+
         return attrs;
     },
 
@@ -300,6 +343,10 @@ User = ghostBookshelf.Model.extend({
 
     permissions: function permissionsFn() {
         return this.belongsToMany('Permission');
+    },
+
+    user_settings: function userSettings() {
+        return this.hasOne('UserSettings', 'user_id');
     },
 
     apiKeys() {
