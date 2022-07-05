@@ -561,6 +561,36 @@
                     "name": "Edit newsletters",
                     "action_type": "edit",
                     "object_type": "newsletter"
+                },
+                {
+                    "name": "Browse comments",
+                    "action_type": "browse",
+                    "object_type": "comment"
+                },
+                {
+                    "name": "Read comments",
+                    "action_type": "read",
+                    "object_type": "comment"
+                },
+                {
+                    "name": "Edit comments",
+                    "action_type": "edit",
+                    "object_type": "comment"
+                },
+                {
+                    "name": "Add comments",
+                    "action_type": "add",
+                    "object_type": "comment"
+                },
+                {
+                    "name": "Delete comments",
+                    "action_type": "delete",
+                    "object_type": "comment"
+                },
+                {
+                    "name": "Moderate comments",
+                    "action_type": "moderate",
+                    "object_type": "comment"
                 }
             ]
         },
@@ -678,7 +708,8 @@
                     "offer": "all",
                     "authentication": "resetAllPasswords",
                     "members_stripe_connect": "auth",
-                    "newsletter": "all"
+                    "newsletter": "all",
+                    "comment": "all"
                 },
                 "DB Backup Integration": {
                     "db": "all"
