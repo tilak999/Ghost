@@ -52,6 +52,7 @@ module.exports = {
                 // @TODO fix this!
                 // Permissions is an array of models
                 // Roles is a JSON array
+                console.log('user', {permissions: allPerms, roles: user.roles});
                 return {permissions: allPerms, roles: user.roles};
             });
     },
@@ -70,7 +71,22 @@ module.exports = {
                 const permissions = foundApiKey.related('role').related('permissions').models;
                 const roles = [foundApiKey.toJSON().role];
 
+                console.log('apiKey', {permissions, roles});
                 return {permissions, roles};
+            });
+    },
+
+    member(id) {
+        return models.Members.findOne({id})
+            .then((foundMember) => {
+                if (!foundMember) {
+                    throw new errors.NotFoundError({
+                        message: tpl(messages.apiKeyNotFound)
+                    });
+                }
+
+                console.log('members', foundMember);
+                return {};
             });
     }
 };

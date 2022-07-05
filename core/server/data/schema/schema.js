@@ -194,6 +194,7 @@ module.exports = {
         role_id: {type: 'string', maxlength: 24, nullable: false},
         permission_id: {type: 'string', maxlength: 24, nullable: false}
     },
+
     settings: {
         id: {type: 'string', maxlength: 24, nullable: false, primary: true},
         group: {

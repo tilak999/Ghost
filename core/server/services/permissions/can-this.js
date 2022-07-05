@@ -122,6 +122,7 @@ CanThisResult.prototype.beginCheck = function (context) {
     const self = this;
     let userPermissionLoad;
     let apiKeyPermissionLoad;
+    let memberPermissionLoad;
     let permissionsLoad;
 
     // Get context.user, context.api_key and context.app
@@ -147,11 +148,16 @@ CanThisResult.prototype.beginCheck = function (context) {
         apiKeyPermissionLoad = Promise.resolve(null);
     }
 
+    if (context.member) {
+        memberPermissionLoad = providers.member(context.member.id);
+    }
+
     // Wait for both user and app permissions to load
-    permissionsLoad = Promise.all([userPermissionLoad, apiKeyPermissionLoad]).then(function (result) {
+    permissionsLoad = Promise.all([userPermissionLoad, apiKeyPermissionLoad, memberPermissionLoad]).then(function (result) {
         return {
             user: result[0],
-            apiKey: result[1]
+            apiKey: result[1],
+            member: result[2]
         };
     });
 
@@ -170,6 +176,8 @@ CanThisResult.prototype.beginCheck = function (context) {
             value: objTypeHandlers
         });
     });
+
+    console.log('THIS', this);
 
     // Return this for chaining
     return this;
