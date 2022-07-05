@@ -31,7 +31,7 @@ module.exports = combineTransactionalMigrations(
     ]),
     addPermissionWithRoles({
         name: 'Delete comments',
-        action: 'delete',
+        action: 'destroy',
         object: 'comment'
     }, [
         'Administrator'

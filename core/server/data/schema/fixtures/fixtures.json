@@ -584,7 +584,7 @@
                 },
                 {
                     "name": "Delete comments",
-                    "action_type": "delete",
+                    "action_type": "destroy",
                     "object_type": "comment"
                 },
                 {
