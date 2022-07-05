@@ -184,8 +184,6 @@ CanThisResult.prototype.beginCheck = function (context) {
         });
     });
 
-    console.log('THIS', this);
-
     // Return this for chaining
     return this;
 };

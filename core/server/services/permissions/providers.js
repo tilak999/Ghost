@@ -75,43 +75,18 @@ module.exports = {
             });
     },
 
-    member(id) {
-        return models.Member.findOne({id})
-            .then((foundMember) => {
-                if (!foundMember) {
-                    throw new errors.NotFoundError({
-                        message: tpl(messages.memberNotFound)
-                    });
-                }
-
-                const permissions = [
-                    new models.Permission({
-                        name: 'Browse comments',
-                        action_type: 'browse',
-                        object_type: 'comment'
-                    }),
-                    new models.Permission({
-                        name: 'Read comments',
-                        action_type: 'read',
-                        object_type: 'comment'
-                    }),
-                    new models.Permission({
-
-                        name: 'Edit comments',
-                        action_type: 'edit',
-                        object_type: 'comment'
-                    }),
-                    new models.Permission({
-                        name: 'Add comments',
-                        action_type: 'add',
-                        object_type: 'comment'
-                    }),
-                    new models.Permission({
-                        name: 'Delete comments',
-                        action_type: 'destroy',
-                        object_type: 'comment'
-                    })];
-                return {permissions};
+    async member(id) {
+        const foundMember = await models.Member.findOne({id});
+        if (!foundMember) {
+            throw new errors.NotFoundError({
+                message: tpl(messages.memberNotFound)
             });
+        }
+
+        // @TODO: figure out how we want to associate members with permissions
+        // Dirty code to load all comment permissions except moderation for members
+        const permissions = await models.Permission.findAll({filter: 'object_type:comment+action_type:-moderate'});
+
+        return {permissions: permissions.models};
     }
 };
