@@ -51,6 +51,7 @@ const TABLES_ALLOWLIST = [
     'custom_theme_settings',
     'tags',
     'users',
+    'user_settings',
     'products',
     'stripe_products',
     'stripe_prices',

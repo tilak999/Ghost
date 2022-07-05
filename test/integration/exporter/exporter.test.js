@@ -74,6 +74,7 @@ describe('Exporter', function () {
                 'tags',
                 'tokens',
                 'users',
+                'user_settings',
                 'webhooks'
             ];
 

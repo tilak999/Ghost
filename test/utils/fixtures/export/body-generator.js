@@ -160,7 +160,8 @@ const exportedBodyLatest = () => {
                 stripe_prices: [],
                 stripe_products: [],
                 tags: [],
-                users: []
+                users: [],
+                user_settings: []
             }
         }]
     });

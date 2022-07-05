@@ -153,6 +153,11 @@ module.exports = {
         updated_at: {type: 'dateTime', nullable: true},
         updated_by: {type: 'string', maxlength: 24, nullable: true}
     },
+    user_settings: {
+        id: {type: 'string', maxlength: 24, nullable: false, primary: true},
+        user_id: {type: 'string', maxlength: 24, nullable: false, references: 'users.id', unique: true, cascadeDelete: true},
+        comment_notifications: {type: 'boolean', nullable: false, defaultTo: true}
+    },
     posts_authors: {
         id: {type: 'string', maxlength: 24, nullable: false, primary: true},
         post_id: {type: 'string', maxlength: 24, nullable: false, references: 'posts.id'},
