@@ -1,8 +1,10 @@
 const ghostBookshelf = require('./base');
+const _ = require('lodash');
 const errors = require('@tryghost/errors');
 const tpl = require('@tryghost/tpl');
 
 const messages = {
+    commentNotFound: 'Comment could not be found',
     notYourComment: 'You may only edit your own comments'
 };
 
@@ -38,8 +40,31 @@ const Comment = ghostBookshelf.Model.extend({
         model.emitChange('added', options);
     }
 }, {
-    async permissible(id, action, context, unsafeAttrs, loadedPermissions, hasUserPermission, hasApiKeyPermission, hasMemberPermission) {
-        if (action === 'edit' || action === 'destroy' && id !== context.member.id) {
+    async permissible(commentModelOrId, action, context, unsafeAttrs, loadedPermissions, hasUserPermission, hasApiKeyPermission, hasMemberPermission) {
+        const self = this;
+
+        if (_.isString(commentModelOrId)) {
+            // Grab the original args without the first one
+            const origArgs = _.toArray(arguments).slice(1);
+
+            // Get the actual comment model
+            return this.findOne({
+                id: commentModelOrId
+            }).then(function then(foundCommentModel) {
+                if (!foundCommentModel) {
+                    throw new errors.NotFoundError({
+                        message: tpl(messages.commentNotFound)
+                    });
+                }
+
+                // Build up the original args but substitute with actual model
+                const newArgs = [foundCommentModel].concat(origArgs);
+
+                return self.permissible.apply(self, newArgs);
+            });
+        }
+
+        if ((action === 'edit' || action === 'destroy') && commentModelOrId.get('member_id') !== context.member.id) {
             return Promise.reject(new errors.NoPermissionError({
                 message: tpl(messages.notYourComment)
             }));
