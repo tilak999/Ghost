@@ -8,7 +8,7 @@ module.exports = function (data) {
 
         ---
 
-        Sent to ${data.email} from ${data.siteDomain}.
+        Sent to ${data.toEmail} from ${data.siteDomain}.
         You can manage your notification preferences at ${data.staffUrl}.
     `;
 };

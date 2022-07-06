@@ -44,7 +44,7 @@ class CommentsService {
         return this.supportAddress || this.membersAddress;
     }
 
-    extractInitials(name) {
+    extractInitials(name = '') {
         const names = name.split(' ');
         const initials = names.length > 1 ? [names[0][0], names[names.length - 1][0]] : [names[0][0]];
         return initials.join('').toUpperCase();
