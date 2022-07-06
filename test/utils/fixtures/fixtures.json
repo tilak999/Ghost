@@ -581,13 +581,13 @@
                     "name": "Add comments",
                     "action_type": "add",
                     "object_type": "comment"
-                 },
-                 {
-                     "name": "Delete comments",
-                     "action_type": "destroy",
-                     "object_type": "comment"
-                 },
-                 {
+                },
+                {
+                    "name": "Delete comments",
+                    "action_type": "destroy",
+                    "object_type": "comment"
+                },
+                {
                     "name": "Moderate comments",
                     "action_type": "moderate",
                     "object_type": "comment"
