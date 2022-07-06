@@ -40,7 +40,7 @@ describe('Comments API', function () {
         });
 
         it('Can comment on a post', async function () {
-            await membersAgent
+            const {body} = await membersAgent
                 .post(`/api/comments/`)
                 .body({comments: [{
                     post_id: postId,
