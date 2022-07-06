@@ -566,11 +566,30 @@
                     "name": "Browse comments",
                     "action_type": "browse",
                     "object_type": "comment"
-                }
-                ,
+                },
+                {
+                    "name": "Read comments",
+                    "action_type": "read",
+                    "object_type": "comment"
+                },
+                {
+                    "name": "Edit comments",
+                    "action_type": "edit",
+                    "object_type": "comment"
+                },
                 {
                     "name": "Add comments",
                     "action_type": "add",
+                    "object_type": "comment"
+                 },
+                 {
+                     "name": "Delete comments",
+                     "action_type": "destroy",
+                     "object_type": "comment"
+                 },
+                 {
+                    "name": "Moderate comments",
+                    "action_type": "moderate",
                     "object_type": "comment"
                 }
             ]
