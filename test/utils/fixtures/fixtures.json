@@ -561,6 +561,17 @@
                     "name": "Edit newsletters",
                     "action_type": "edit",
                     "object_type": "newsletter"
+                },
+                {
+                    "name": "Browse comments",
+                    "action_type": "browse",
+                    "object_type": "comment"
+                }
+                ,
+                {
+                    "name": "Add comments",
+                    "action_type": "add",
+                    "object_type": "comment"
                 }
             ]
         },
@@ -851,7 +862,9 @@
                     "offer": "all",
                     "authentication": "resetAllPasswords",
                     "members_stripe_connect": "auth",
-                    "newsletter": "all"
+                    "newsletter": "all",
+                    "comment": "all",
+                    "comments_like": "all"
                 },
                 "DB Backup Integration": {
                     "db": "all"
