@@ -28,7 +28,7 @@ describe('Comments API', function () {
         });
 
         it('Can comment on a post', async function () {
-            const {body} = await membersAgent
+            await membersAgent
                 .post(`/api/comments/`)
                 .body({comments: [{
                     post_id: postId,
@@ -42,10 +42,7 @@ describe('Comments API', function () {
                 .matchBodySnapshot({
                     comments: [{
                         id: anyObjectId,
-                        member_id: anyObjectId,
-                        post_id: anyObjectId,
-                        created_at: anyISODateTime,
-                        updated_at: anyISODateTime
+                        created_at: anyISODateTime
                     }]
                 });
             // Save for other tests
@@ -53,7 +50,7 @@ describe('Comments API', function () {
         });
 
         it('Can browse all comments of a post', async function () {
-            const {body} = await membersAgent
+            await membersAgent
                 .get(`/api/comments/?filter=post_id:${postId}&include=member`)
                 .expectStatus(200)
                 .matchHeaderSnapshot({
@@ -62,16 +59,10 @@ describe('Comments API', function () {
                 .matchBodySnapshot({
                     comments: [{
                         id: anyObjectId,
-                        member_id: anyObjectId,
-                        member: {
-                            id: anyObjectId,
-                            created_at: anyISODateTime,
-                            updated_at: anyISODateTime,
-                            uuid: anyUuid
-                        },
-                        post_id: anyObjectId,
                         created_at: anyISODateTime,
-                        updated_at: anyISODateTime
+                        member: {
+                            id: anyObjectId
+                        }
                     }]
                 });
         });
