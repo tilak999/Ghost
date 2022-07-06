@@ -30,6 +30,7 @@ const boot = require('../../core/boot');
 const AdminAPITestAgent = require('./admin-api-test-agent');
 const MembersAPITestAgent = require('./members-api-test-agent');
 const ContentAPITestAgent = require('./content-api-test-agent');
+const CommentsAPITestAgent = require('./comments-api-test-agent');
 const GhostAPITestAgent = require('./ghost-api-test-agent');
 const db = require('./db-utils');
 
@@ -281,6 +282,43 @@ const getAgentsForMembers = async () => {
     };
 };
 
+const getAgentsForComments = async () => {
+    let membersAgent;
+    let adminAgent;
+    let commentsAgent;
+
+    const bootOptions = {
+        frontend: true
+    };
+
+    try {
+        const app = await startGhost(bootOptions);
+        const originURL = configUtils.config.get('url');
+
+        membersAgent = new MembersAPITestAgent(app, {
+            apiURL: '/members/',
+            originURL
+        });
+        adminAgent = new AdminAPITestAgent(app, {
+            apiURL: '/ghost/api/admin/',
+            originURL
+        });
+        commentsAgent = new CommentsAPITestAgent(app, {
+            apiURL: '/members/comments/',
+            originURL
+        });
+    } catch (error) {
+        error.message = `Unable to create test agent. ${error.message}`;
+        throw error;
+    }
+
+    return {
+        adminAgent,
+        membersAgent,
+        commentsAgent
+    };
+};
+
 const insertWebhook = ({event, url}) => {
     return fixtureUtils.fixtures.insertWebhook({
         event: event,
@@ -295,7 +333,8 @@ module.exports = {
         getMembersAPIAgent,
         getContentAPIAgent,
         getAgentsForMembers,
-        getGhostAPIAgent
+        getGhostAPIAgent,
+        getAgentsForComments
     },
 
     // Mocks and Stubs
