@@ -3,13 +3,25 @@ const {anyEtag, anyObjectId, anyLocationFor, anyISODateTime, anyUuid} = matchers
 
 let membersAgent, membersService, postId, commentId;
 
+const commentMatcher = {
+    id: anyObjectId,
+    created_at: anyISODateTime
+};
+
+const commentMatcherWithMember = {
+    id: anyObjectId,
+    created_at: anyISODateTime,
+    member: {
+        id: anyObjectId
+    }
+};
+
 describe('Comments API', function () {
     before(async function () {
         const agents = await agentProvider.getAgentsForComments();
         membersAgent = agents.membersAgent;
 
-        await fixtureManager.init('posts', 'members');
-        //await fixtureManager.init('comments');
+        await fixtureManager.init('posts', 'members', 'comments');
 
         postId = fixtureManager.get('posts', 0).id;
     });
@@ -40,10 +52,7 @@ describe('Comments API', function () {
                     location: anyLocationFor('comments')
                 })
                 .matchBodySnapshot({
-                    comments: [{
-                        id: anyObjectId,
-                        created_at: anyISODateTime
-                    }]
+                    comments: [commentMatcher]
                 });
             // Save for other tests
             commentId = body.comments[0].id;
@@ -57,13 +66,7 @@ describe('Comments API', function () {
                     etag: anyEtag
                 })
                 .matchBodySnapshot({
-                    comments: [{
-                        id: anyObjectId,
-                        created_at: anyISODateTime,
-                        member: {
-                            id: anyObjectId
-                        }
-                    }]
+                    comments: new Array(3).fill(commentMatcherWithMember)
                 });
         });
 
