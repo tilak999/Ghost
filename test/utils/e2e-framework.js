@@ -352,6 +352,7 @@ module.exports = {
         }
     },
     matchers: {
+        anyBoolean: any(Boolean),
         anyString: any(String),
         anyArray: any(Array),
         anyNumber: any(Number),
