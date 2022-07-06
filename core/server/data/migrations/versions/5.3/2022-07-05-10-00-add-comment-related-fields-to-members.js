@@ -1,5 +1,3 @@
-const logging = require('@tryghost/logging');
-
 const {createAddColumnMigration, combineNonTransactionalMigrations} = require('../../utils');
 
 module.exports = combineNonTransactionalMigrations(
