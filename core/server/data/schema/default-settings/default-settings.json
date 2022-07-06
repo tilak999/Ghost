@@ -459,7 +459,7 @@
                 "isEmpty": false,
                 "isIn": [[
                     "off",
-                    "free",
+                    "all",
                     "paid"
                 ]]
             }
