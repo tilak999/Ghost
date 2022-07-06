@@ -4,12 +4,12 @@ require('should');
 
 let membersAgent, membersService, postId, commentId;
 
-const commentMatcher = {
+const commentMatcherNoMember = {
     id: anyObjectId,
     created_at: anyISODateTime
 };
 
-const commentMatcherWithMember = {
+const commentMatcher = {
     id: anyObjectId,
     created_at: anyISODateTime,
     member: {
@@ -18,6 +18,17 @@ const commentMatcherWithMember = {
     },
     likes_count: anyNumber,
     liked: anyBoolean
+};
+
+const commentMatcherWithReply = {
+    id: anyObjectId,
+    created_at: anyISODateTime,
+    member: {
+        id: anyObjectId
+    },
+    likes_count: anyNumber,
+    liked: anyBoolean,
+    replies: [commentMatcher]
 };
 
 describe('Comments API', function () {
@@ -56,7 +67,7 @@ describe('Comments API', function () {
                     location: anyLocationFor('comments')
                 })
                 .matchBodySnapshot({
-                    comments: [commentMatcher]
+                    comments: [commentMatcherNoMember]
                 });
             // Save for other tests
             commentId = body.comments[0].id;
@@ -70,7 +81,7 @@ describe('Comments API', function () {
                     etag: anyEtag
                 })
                 .matchBodySnapshot({
-                    comments: new Array(2).fill(commentMatcherWithMember)
+                    comments: [commentMatcherWithReply, commentMatcher]
                 });
         });
 
@@ -83,7 +94,7 @@ describe('Comments API', function () {
                     etag: anyEtag
                 })
                 .matchBodySnapshot({
-                    comments: new Array(1).fill(commentMatcherWithMember)
+                    comments: new Array(1).fill(commentMatcher)
                 })
                 .expect(({body}) => {
                     body.comments[0].liked.should.eql(false);
@@ -106,7 +117,7 @@ describe('Comments API', function () {
                     etag: anyEtag
                 })
                 .matchBodySnapshot({
-                    comments: new Array(1).fill(commentMatcherWithMember)
+                    comments: new Array(1).fill(commentMatcher)
                 })
                 .expect(({body}) => {
                     body.comments[0].liked.should.eql(true);
@@ -146,7 +157,7 @@ describe('Comments API', function () {
                     etag: anyEtag
                 })
                 .matchBodySnapshot({
-                    comments: new Array(1).fill(commentMatcherWithMember)
+                    comments: new Array(1).fill(commentMatcher)
                 })
                 .expect(({body}) => {
                     body.comments[0].liked.should.eql(false);
