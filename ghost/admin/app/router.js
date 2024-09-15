@@ -21,6 +21,7 @@ Router.map(function () {
 
     this.route('whatsnew');
     this.route('site');
+    this.route('console');
     this.route('dashboard');
     this.route('launch');
     this.route('stats');

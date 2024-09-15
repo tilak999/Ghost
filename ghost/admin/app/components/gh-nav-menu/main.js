@@ -95,6 +95,20 @@ export default class Main extends Component.extend(ShortcutsMixin) {
     }
 
     @action
+    transitionToOrRefreshConsole() {
+        let {currentRouteName} = this.router;
+        if (currentRouteName === 'console') {
+            getOwner(this).lookup(`route:${currentRouteName}`).refresh();
+        } else {
+            if (this.session.user.isContributor) {
+                this.router.transitionTo('posts');
+            } else {
+                this.router.transitionTo('console');
+            }
+        }
+    }
+
+    @action
     openSearchModal() {
         return this.modals.open(SearchModal);
     }

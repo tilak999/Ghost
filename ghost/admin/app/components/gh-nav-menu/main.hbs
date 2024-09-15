@@ -147,6 +147,14 @@
                             <GhBillingUpdateButton />
                         </li>
                     {{/if}}
+
+                     <li class="relative">
+                        <span {{action "transitionToOrRefreshConsole" on="click"}}>
+                            <LinkTo @route="console" data-test-nav="console"@current-when="console" @preventDefault={{false}}>
+                                {{svg-jar "view-site"}} Console
+                            </LinkTo>
+                        </span>
+                    </li>
                 </ul>
                 {{/if}}
 
