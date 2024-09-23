@@ -103,7 +103,7 @@ export default class Main extends Component.extend(ShortcutsMixin) {
             if (this.session.user.isContributor) {
                 this.router.transitionTo('posts');
             } else {
-                this.router.transitionTo('console');
+                this.router.transitionTo('site');
             }
         }
     }

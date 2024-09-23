@@ -21,7 +21,6 @@ Router.map(function () {
 
     this.route('whatsnew');
     this.route('site');
-    this.route('console');
     this.route('dashboard');
     this.route('launch');
     this.route('stats');
@@ -84,6 +83,10 @@ Router.map(function () {
     this.route('member.new', {path: '/members/new'});
     this.route('member', {path: '/members/:member_id'});
     this.route('members-activity');
+
+    // typetale pages
+    this.route('console');
+    this.route('analytics');
 
     // this.route('offers');
 

@@ -135,28 +135,26 @@
                     {{/if}}
                 </ul>
 
-                {{#if this.session.user.isOwnerOnly}}
                 <ul class="gh-nav-list">
-                    {{#if this.showBilling}}
-                        <li class="relative">
-                            <a href="javascript:void(0)" class={{if this.billing.billingWindowOpen "active"}} {{action "toggleBillingModal" }} data-test-nav="billing">
-                                {{svg-jar "credit-card"}} Ghost(Pro)
-                            </a>
-                        </li>
-                        <li class="relative gh-nav-pro">
-                            <GhBillingUpdateButton />
-                        </li>
-                    {{/if}}
-
-                     <li class="relative">
+                    {{#if this.session.user.isOwnerOnly}}
+                    <li class="relative">
                         <span {{action "transitionToOrRefreshConsole" on="click"}}>
-                            <LinkTo @route="console" data-test-nav="console"@current-when="console" @preventDefault={{false}}>
-                                {{svg-jar "view-site"}} Console
+                            <LinkTo @route="console" data-test-nav="console" @current-when="console" @preventDefault={{false}}>
+                                {{svg-jar "credit-card"}} Console
                             </LinkTo>
                         </span>
                     </li>
+                    {{/if}}
+                    {{#if (gh-user-can-admin this.session.user)}}
+                     <li class="relative">
+                        <span>
+                            <LinkTo @route="analytics" data-test-nav="analytics" @current-when="analytics" @preventDefault={{false}}>
+                                {{svg-jar "stats"}} Web Analytics
+                            </LinkTo>
+                        </span>
+                    </li>
+                    {{/if}}
                 </ul>
-                {{/if}}
 
                 {{#if this.showMenuExtension}}
                     <ul class="gh-nav-list gh-nav-settings">
