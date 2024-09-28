@@ -1,13 +1,15 @@
-import React from 'react';
+import NiceModal from '@ebay/nice-modal-react';
+import React, {useEffect, useRef} from 'react';
+import {Button, LoadingIndicator, NoValueLabel} from '@tryghost/admin-x-design-system';
 
 import APAvatar, {AvatarBadge} from './global/APAvatar';
-import ActivityItem from './activities/ActivityItem';
+import ActivityItem, {type Activity} from './activities/ActivityItem';
+import ArticleModal from './feed/ArticleModal';
 import MainNavigation from './navigation/MainNavigation';
-import {Button, NoValueLabel} from '@tryghost/admin-x-design-system';
 
 import getUsername from '../utils/get-username';
-import {useBrowseInboxForUser, useBrowseOutboxForUser, useFollowersForUser} from '../MainContent';
-import {useSiteUrl} from '../hooks/useActivityPubQueries';
+import {useActivitiesForUser, useSiteUrl} from '../hooks/useActivityPubQueries';
+import {useFollowersForUser} from '../MainContent';
 
 interface ActivitiesProps {}
 
@@ -18,34 +20,11 @@ enum ACTVITY_TYPE {
     FOLLOW = 'Follow'
 }
 
-type Actor = {
-    id: string
-    name: string
-    preferredUsername: string
-    url: string
-}
-
-type ActivityObject = {
-    name: string
-    url: string
-    inReplyTo: string | null
-    content: string
-}
-
-type Activity = {
-    id: string
-    type: ACTVITY_TYPE
-    object?: ActivityObject
-    actor: Actor
-}
-
-const getActivityDescription = (activity: Activity, activityObjectsMap: Map<string, ActivityObject>): string => {
+const getActivityDescription = (activity: Activity): string => {
     switch (activity.type) {
     case ACTVITY_TYPE.CREATE:
-        const object = activityObjectsMap.get(activity.object?.inReplyTo || '');
-
-        if (object?.name) {
-            return `Commented on your article "${object.name}"`;
+        if (activity.object?.inReplyTo && typeof activity.object?.inReplyTo !== 'string') {
+            return `Commented on your article "${activity.object.inReplyTo.name}"`;
         }
 
         return '';
@@ -76,7 +55,7 @@ const getExtendedDescription = (activity: Activity): JSX.Element | null => {
 
 const getActivityUrl = (activity: Activity): string | null => {
     if (activity.object) {
-        return activity.object.url;
+        return activity.object.url || null;
     }
 
     return null;
@@ -105,61 +84,48 @@ const getActivityBadge = (activity: Activity): AvatarBadge => {
 
 const Activities: React.FC<ActivitiesProps> = ({}) => {
     const user = 'index';
-
-    // Retrieve activities from the inbox AND the outbox
-    // Why the need for the outbox? The outbox contains activities that the user
-    // has performed, and we sometimes need information about the object
-    // associated with the activity (i.e when displaying the name of an article
-    // that a reply was made to)
-    const {data: inboxActivities = []} = useBrowseInboxForUser(user);
-    const {data: outboxActivities = []} = useBrowseOutboxForUser(user);
     const siteUrl = useSiteUrl();
 
-    // Create a map of activity objects from activities in the inbox and outbox.
-    // This allows us to quickly look up an object associated with an activity
-    // We could just make a http request to get the object, but this is more
-    // efficient seeming though we already have the data in the inbox and outbox
-    const activityObjectsMap = new Map<string, ActivityObject>();
-
-    outboxActivities.forEach((activity) => {
-        if (activity.object) {
-            activityObjectsMap.set(activity.object.id, activity.object);
-        }
-    });
-    inboxActivities.forEach((activity) => {
-        if (activity.object) {
-            activityObjectsMap.set(activity.object.id, activity.object);
+    const {
+        data,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage
+    } = useActivitiesForUser({
+        handle: user,
+        includeOwn: true,
+        includeReplies: true,
+        filter: {
+            type: ['Follow', 'Like', `Create:Note:isReplyToOwn,${new URL(siteUrl).hostname}`]
         }
     });
 
-    // Filter the activities to show
-    const activities = inboxActivities.filter((activity) => {
-        // Only show "Create" activities that are replies to a post created
-        // by the user
-        if (activity.type === ACTVITY_TYPE.CREATE) {
-            const replyToObject = activityObjectsMap.get(activity.object?.inReplyTo || '');
+    const activities = (data?.pages.flatMap(page => page.data) ?? []);
 
-            // If the reply object is not found, or it doesn't have a URL or
-            // name, do not show the activity
-            if (!replyToObject || !replyToObject.url || !replyToObject.name) {
-                return false;
+    const observerRef = useRef<IntersectionObserver | null>(null);
+    const loadMoreRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+        if (observerRef.current) {
+            observerRef.current.disconnect();
+        }
+
+        observerRef.current = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+                fetchNextPage();
             }
+        });
 
-            // Verify that the reply is to a post created by the user by
-            // checking that the hostname associated with the reply object
-            // is the same as the hostname of the site. This is not a bullet
-            // proof check, but it's a good enough for now
-            const hostname = new URL(siteUrl).hostname;
-            const replyToObjectHostname = new URL(replyToObject.url).hostname;
-
-            return hostname === replyToObjectHostname;
+        if (loadMoreRef.current) {
+            observerRef.current.observe(loadMoreRef.current);
         }
 
-        return [ACTVITY_TYPE.FOLLOW, ACTVITY_TYPE.LIKE].includes(activity.type);
-    })
-        // API endpoint currently returns items oldest-newest, so reverse them
-        // to show the most recent activities first
-        .reverse();
+        return () => {
+            if (observerRef.current) {
+                observerRef.current.disconnect();
+            }
+        };
+    }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
 
     // Retrieve followers for the user
     const {data: followers = []} = useFollowersForUser(user);
@@ -180,28 +146,48 @@ const Activities: React.FC<ActivitiesProps> = ({}) => {
                     </div>
                 )}
                 {activities.length > 0 && (
-                    <div className='mt-8 flex w-full max-w-[560px] flex-col'>
-                        {activities?.map(activity => (
-                            <ActivityItem key={activity.id} url={getActivityUrl(activity) || getActorUrl(activity)}>
-                                <APAvatar author={activity.actor} badge={getActivityBadge(activity)} />
-                                <div className='pt-[2px]'>
-                                    <div className='text-grey-600'>
-                                        <span className='mr-1 font-bold text-black'>{activity.actor.name}</span>
-                                        {getUsername(activity.actor)}
+                    <>
+                        <div className='mt-8 flex w-full max-w-[560px] flex-col'>
+                            {activities?.map(activity => (
+                                <ActivityItem
+                                    key={activity.id}
+                                    url={getActivityUrl(activity) || getActorUrl(activity)}
+                                    onClick={
+                                        activity.type === ACTVITY_TYPE.CREATE ? () => {
+                                            NiceModal.show(ArticleModal, {
+                                                object: activity.object,
+                                                actor: activity.actor,
+                                                comments: activity.object.replies
+                                            });
+                                        } : undefined
+                                    }
+                                >
+                                    <APAvatar author={activity.actor} badge={getActivityBadge(activity)} />
+                                    <div className='pt-[2px]'>
+                                        <div className='text-grey-600'>
+                                            <span className='mr-1 font-bold text-black'>{activity.actor.name}</span>
+                                            {getUsername(activity.actor)}
+                                        </div>
+                                        <div className=''>{getActivityDescription(activity)}</div>
+                                        {getExtendedDescription(activity)}
                                     </div>
-                                    <div className=''>{getActivityDescription(activity, activityObjectsMap)}</div>
-                                    {getExtendedDescription(activity)}
-                                </div>
-                                {isFollower(activity.actor.id) === false && (
-                                    <Button className='ml-auto' label='Follow' link onClick={(e) => {
-                                        e?.preventDefault();
+                                    {isFollower(activity.actor.id) === false && (
+                                        <Button className='ml-auto' label='Follow' link onClick={(e) => {
+                                            e?.preventDefault();
 
-                                        alert('Implement me!');
-                                    }} />
-                                )}
-                            </ActivityItem>
-                        ))}
-                    </div>
+                                            alert('Implement me!');
+                                        }} />
+                                    )}
+                                </ActivityItem>
+                            ))}
+                        </div>
+                        <div ref={loadMoreRef} className='h-1'></div>
+                        {isFetchingNextPage && (
+                            <div className='flex flex-col items-center justify-center space-y-4 text-center'>
+                                <LoadingIndicator size='md' />
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </>

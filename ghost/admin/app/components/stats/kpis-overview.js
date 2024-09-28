@@ -2,13 +2,14 @@ import Component from '@glimmer/component';
 import fetch from 'fetch';
 import {action} from '@ember/object';
 import {formatNumber} from 'ghost-admin/helpers/format-number';
+import {getStatsParams} from 'ghost-admin/utils/stats';
 import {inject} from 'ghost-admin/decorators/inject';
 import {task} from 'ember-concurrency';
 import {tracked} from '@glimmer/tracking';
 
 export default class KpisOverview extends Component {
     @inject config;
-    @tracked selected = 'unique_visitors';
+    @tracked selected = 'unique_visits';
     @tracked totals = null;
     @tracked showGranularity = true;
 
@@ -42,21 +43,23 @@ export default class KpisOverview extends Component {
 
     constructor() {
         super(...arguments);
-        this.fetchData.perform();
+        this.fetchDataIfNeeded();
     }
 
-    setupFocusListener() {
-        document.addEventListener('visibilitychange', () => {
-            if (!document.hidden) {
-                this.fetchData.perform();
-            }
-        });
+    @action
+    fetchDataIfNeeded() {
+        this.fetchData.perform(this.args);
     }
 
     @task
-    *fetchData() {
+    *fetchData(args) {
         try {
-            const response = yield fetch(`${this.config.stats.endpoint}/v0/pipes/kpis.json?site_uuid=${this.config.stats.id}`, {
+            const params = new URLSearchParams(getStatsParams(
+                this.config,
+                args
+            ));
+
+            const response = yield fetch(`${this.config.stats.endpoint}/v0/pipes/kpis.json?${params}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -93,7 +96,7 @@ export default class KpisOverview extends Component {
             avg_session_sec: Math.floor(_ponderatedKPIsTotal('avg_session_sec') / 60),
             pageviews: formatNumber(_KPITotal('pageviews')),
             visits: formatNumber(totalVisits),
-            bounce_rate: _ponderatedKPIsTotal('bounce_rate').toFixed(2)
+            bounce_rate: (_ponderatedKPIsTotal('bounce_rate') * 100).toFixed(0)
         };
     }
 
@@ -104,13 +107,8 @@ export default class KpisOverview extends Component {
     }
 
     @action
-    changeTabToUniqueVisitors() {
-        this.selected = 'unique_visitors';
-    }
-
-    @action
-    changeTabToVisits() {
-        this.selected = 'visits';
+    changeTabToUniqueVisits() {
+        this.selected = 'unique_visits';
     }
 
     @action
@@ -128,12 +126,8 @@ export default class KpisOverview extends Component {
         this.selected = 'bounce_rate';
     }
 
-    get uniqueVisitorsTabSelected() {
-        return (this.selected === 'unique_visitors');
-    }
-
-    get visitsTabSelected() {
-        return (this.selected === 'visits');
+    get uniqueVisitsTabSelected() {
+        return (this.selected === 'unique_visits');
     }
 
     get pageviewsTabSelected() {
