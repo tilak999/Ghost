@@ -138,11 +138,9 @@
                 <ul class="gh-nav-list">
                     {{#if this.session.user.isOwnerOnly}}
                     <li class="relative">
-                        <span {{action "transitionToOrRefreshConsole" on="click"}}>
-                            <LinkTo @route="console" data-test-nav="console" @current-when="console" @preventDefault={{false}}>
-                                {{svg-jar "credit-card"}} Console
-                            </LinkTo>
-                        </span>
+                        <LinkTo @route="pro" data-test-nav="pro" @current-when="pro" @preventDefault={{false}}>
+                            {{svg-jar "credit-card"}} Console
+                        </LinkTo>
                     </li>
                     {{/if}}
                     {{#if (gh-user-can-admin this.session.user)}}

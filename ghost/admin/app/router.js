@@ -25,9 +25,9 @@ Router.map(function () {
     this.route('launch');
     this.route('stats');
 
-    this.route('pro', function () {
+    /*this.route('pro', function () {
         this.route('pro-sub', {path: '/*sub'});
-    });
+    });*/
 
     this.route('posts');
     this.route('posts.analytics', {path: '/posts/analytics/:post_id'});
@@ -87,7 +87,7 @@ Router.map(function () {
     this.route('members-activity');
 
     // typetale pages
-    this.route('console');
+    this.route('pro');
     this.route('analytics');
 
     // this.route('offers');
