@@ -1,0 +1,46 @@
+{
+    "url": "http://localhost:2368",
+    "server": {
+      "port": 2368,
+      "host": "::"
+    },
+    "mail": {
+      "transport": "Direct"
+    },
+    "logging": {
+      "transports": [
+        "file",
+        "stdout"
+      ]
+    },
+    "process": "systemd",
+
+    "paths": {
+      "contentPath": "/var/lib/ghost/content"
+    },
+
+    "mailgunIsConfigured": true,
+    "bulkEmail":{
+      "mailgun": true
+    },
+
+    "hostSettings": {
+
+      "typetale": {
+        "consoleUrl": "https://httpbin.org/get?theme=dark",
+        "analyticsUrl": "https://httpbin.org/get"
+      },
+
+      "billing": {
+        "enabled": true,
+        "url": "https://google.com"
+      },
+
+      "managedEmail": {
+        "enabled": true,
+        "sendingDomain": "string"
+      }
+      
+    }
+  }
+  
