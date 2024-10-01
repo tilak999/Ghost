@@ -26,6 +26,9 @@ jobs:
         with:
           node-version: 20.x
 
+      - name: Install packages
+        run: yarn --frozen-lockfile
+
       - name: Build
         run: yarn build
 
