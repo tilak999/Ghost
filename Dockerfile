@@ -50,20 +50,19 @@ COPY ghost/core/ghost-*.tgz ghost.tgz
 RUN set -eux; \
 	mkdir -p "$GHOST_INSTALL"; \
 	chown node:node "$GHOST_INSTALL"; \
-	\
-	savedAptMark="$(apt-mark showmanual)"; \
+
+RUN	savedAptMark="$(apt-mark showmanual)"; \
 	aptPurge=; \
-	\
 	installCmd='gosu node ghost install --archive /ghost.tgz --db mysql --dbhost mysql --no-prompt --no-stack --no-setup --dir "$GHOST_INSTALL"'; \
 	if ! eval "$installCmd"; then \
 		aptPurge=1; \
 		apt-get update; \
 		apt-get install -y --no-install-recommends g++ make python3; \
 		eval "$installCmd"; \
-	fi; \
-	\
+	fi;
+	
 # Tell Ghost to listen on all ips and not prompt for additional configuration
-	cd "$GHOST_INSTALL"; \
+RUN	cd "$GHOST_INSTALL"; \
 	gosu node ghost config --no-prompt --ip '::' --port 2368 --url 'http://localhost:2368'; \
 	gosu node ghost config paths.contentPath "$GHOST_CONTENT"; \
 	\
