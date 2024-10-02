@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   docker:
-    runs-on: macos-15
+    runs-on: ubuntu-latest
     steps:
 
       - name: Set env
