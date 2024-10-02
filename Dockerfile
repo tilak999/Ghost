@@ -37,8 +37,8 @@ ENV NODE_ENV production
 
 ENV GHOST_CLI_VERSION 1.26.1
 RUN set -eux; \
-	npm install -g "ghost-cli@$GHOST_CLI_VERSION"; \
-	npm cache clean --force
+	yarn global add "ghost-cli@$GHOST_CLI_VERSION"; \
+	yarn cache clean --force
 
 ENV GHOST_INSTALL /var/lib/ghost
 ENV GHOST_CONTENT /var/lib/ghost/content
@@ -49,7 +49,7 @@ COPY ghost/core/ghost-*.tgz ghost.tgz
 
 RUN set -eux; \
 	mkdir -p "$GHOST_INSTALL"; \
-	chown node:node "$GHOST_INSTALL"; \
+	chown node:node "$GHOST_INSTALL"; 
 
 RUN	savedAptMark="$(apt-mark showmanual)"; \
 	aptPurge=; \
@@ -60,7 +60,7 @@ RUN	savedAptMark="$(apt-mark showmanual)"; \
 		apt-get install -y --no-install-recommends g++ make python3; \
 		eval "$installCmd"; \
 	fi;
-	
+
 # Tell Ghost to listen on all ips and not prompt for additional configuration
 RUN	cd "$GHOST_INSTALL"; \
 	gosu node ghost config --no-prompt --ip '::' --port 2368 --url 'http://localhost:2368'; \
